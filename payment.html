@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment | Eco-Glow</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Minimal professional styling */
+      .payment-page {
+        max-width: 450px;
+        margin: 80px auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+
+      .payment-page h2 {
+        color: #0f766e;
+        margin-bottom: 10px;
+      }
+
+      .payment-page p {
+        margin-bottom: 20px;
+        color: #555;
+      }
+
+      .payment-form {
+        text-align: left;
+      }
+
+      .payment-form label {
+        font-weight: bold;
+        margin-top: 10px;
+        display: block;
+      }
+
+      .payment-form input,
+      .payment-form select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+
+      .payment-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .payment-row div {
+        flex: 1;
+      }
+
+      .cta-btn,
+      .payment-form button,
+      .back-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .payment-form button {
+        background: #0f766e;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .payment-form button:hover {
+        background: #115e59;
+      }
+
+      .back-btn {
+        background: transparent;
+        color: #0f766e;
+      }
+
+      .back-btn:hover {
+        text-decoration: underline;
+      }
+
+      /* Hide optional fields by default */
+      .hidden {
+        display: none;
+      }
+
+      #cartSummary {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f0fdfa;
+        border-left: 4px solid #0f766e;
+        border-radius: 6px;
+      }
+
+      #cartSummary ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      #cartSummary li {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="payment-page">
+      <h2>Complete Your Payment</h2>
+      <p>Secure checkout for Eco-Glow Smart Light</p>
+
+      <!-- Cart Summary -->
+      <div id="cartSummary"></div>
+
+      <!-- Payment Form -->
+      <form class="payment-form" id="paymentForm">
+        <label>Payment Method</label>
+        <select id="paymentMethod" required>
+          <option value="">--Select Payment Method--</option>
+          <option value="card">Card</option>
+          <option value="mobile">Mobile Money</option>
+          <option value="bank">Bank Transfer</option>
+        </select>
+
+        <!-- Card Fields -->
+        <div id="cardFields" class="hidden">
+          <label>Card Number</label>
+          <input type="text" placeholder="1234 5678 9012 3456" />
+
+          <label>Card Holder Name</label>
+          <input type="text" placeholder="John Doe" />
+
+          <div class="payment-row">
+            <div>
+              <label>Expiry Date</label>
+              <input type="text" placeholder="MM/YY" />
+            </div>
+
+            <div>
+              <label>CVV</label>
+              <input type="password" placeholder="123" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Money Fields -->
+        <div id="mobileFields" class="hidden">
+          <label>Mobile Number</label>
+          <input type="text" placeholder="08012345678" />
+
+          <label>Provider</label>
+          <select>
+            <option value="mtn">MTN</option>
+            <option value="glo">GLO</option>
+            <option value="airtel">Airtel</option>
+            <option value="9mobile">9Mobile</option>
+          </select>
+        </div>
+
+        <!-- Bank Transfer Fields -->
+        <div id="bankFields" class="hidden">
+          <label>Account Name</label>
+          <input type="text" placeholder="John Doe" />
+
+          <label>Account Number</label>
+          <input type="text" placeholder="0123456789" />
+
+          <label>Bank</label>
+          <input type="text" placeholder="Access Bank" />
+        </div>
+
+        <button type="submit" id="payBtn">Pay ₦0</button>
+      </form>
+
+      <button class="back-btn" onclick="window.history.back()">⬅ Back</button>
+    </section>
+
+    <script>
+      const cartSummary = document.getElementById("cartSummary");
+      const payBtn = document.getElementById("payBtn");
+      const paymentForm = document.getElementById("paymentForm");
+      const paymentMethod = document.getElementById("paymentMethod");
+
+      const cardFields = document.getElementById("cardFields");
+      const mobileFields = document.getElementById("mobileFields");
+      const bankFields = document.getElementById("bankFields");
+
+      // Load cart
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      function updateCartDisplay() {
+        if (cart.length === 0) {
+          cartSummary.innerHTML = "<p>Your cart is empty.</p>";
+          payBtn.textContent = "Pay ₦0";
+          payBtn.disabled = true;
+          return;
+        }
+        payBtn.disabled = false;
+        let total = 0;
+        cartSummary.innerHTML = "<h3>Cart Summary:</h3><ul>";
+
+        cart.forEach((item) => {
+          item.qty = item.qty || 1;
+
+          const itemTotal = item.price * item.qty;
+          total += itemTotal;
+
+        cartSummary.innerHTML += `
+          <div class="cart-item">
+            <div>
+              <strong>${item.name}</strong><br>
+            </div>
+
+            <div class="qty-controls">
+              <button onclick="changeQty(${item.price}, -1)">−</button>
+              <span>${item.qty}</span>
+              <button onclick="changeQty(${item.price}, 1)">+</button>
+            </div>
+
+            <div>
+              ₦${itemTotal.toLocaleString()}<br>
+              <button onclick="removeItem(${item.price})">Remove</button>
+            </div>
+          </div>
+        `;
+        });
+
+        cartSummary.innerHTML += "</div>";
+        payBtn.textContent = `Pay ₦${total.toLocaleString()}`;
+      }
+
+      function changeQty(price, delta) {
+        const item = cart.find((i) => i.price == price);
+        if (!item) return;
+        item.qty = (item.qty || 1) + delta;
+        if (item.qty < 1) item.qty = 1;
+
+        updateCartDisplay();
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+      }
+
+      function removeItem(item) {
+        cart.splice(item.price, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartDisplay();
+      }
+
+      // renderCart();
+
+      updateCartDisplay();
+
+      // Show fields based on payment method
+      paymentMethod.addEventListener("change", () => {
+        cardFields.classList.add("hidden");
+        mobileFields.classList.add("hidden");
+        bankFields.classList.add("hidden");
+
+        switch (paymentMethod.value) {
+          case "card":
+            cardFields.classList.remove("hidden");
+            break;
+          case "mobile":
+            mobileFields.classList.remove("hidden");
+            break;
+          case "bank":
+            bankFields.classList.remove("hidden");
+            break;
+        }
+      });
+
+      // Handle payment submission
+      paymentForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        if (cart.length === 0) {
+          alert("Your cart is empty! Add products first.");
+          return;
+        }
+
+        if (!paymentMethod.value) {
+          alert("Please select a payment method.");
+          return;
+        }
+
+        let totalAmount = cart.reduce(
+          (sum, item) => sum + parseInt(item.price),
+          0
+        );
+        alert(
+          `Payment of ₦${totalAmount.toLocaleString()} successful via ${paymentMethod.value.toUpperCase()} ✅`
+        );
+
+        // Clear cart after payment
+        localStorage.removeItem("cart");
+        cart = [];
+        updateCartDisplay();
+        paymentForm.reset();
+        cardFields.classList.add("hidden");
+        mobileFields.classList.add("hidden");
+        bankFields.classList.add("hidden");
+      });
+
+      function goHome() {
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>
