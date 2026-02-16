@@ -8,8 +8,6 @@ Eco-Glow adapts to your lifestyle, reduces electricity usage, and gives users fu
 
 🔗 https://your-netlify-link.netlify.app
 
-(Replace with your real Netlify link)
-
 ✨ Features
 
 🔐 Authentication system (Login & Sign Up splash screen)
